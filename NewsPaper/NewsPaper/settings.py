@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,7 +27,7 @@ SECRET_KEY = 'django-insecure-9(e-m!wzf5psr-wq2v_nwlg+5c#sop5tpqm09m40b30gs26@&b
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1']
 
 
 # Application definition
@@ -37,6 +39,18 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
+    'django.contrib.flatpages',
+    'django_filters',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+    'django_apscheduler',
+    'news.apps.NewsConfig',
+    'fpages',
+    'sign',
+    'protect',
 ]
 
 MIDDLEWARE = [
@@ -47,6 +61,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
 ]
 
 ROOT_URLCONF = 'NewsPaper.urls'
@@ -54,7 +69,7 @@ ROOT_URLCONF = 'NewsPaper.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -69,6 +84,13 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'NewsPaper.wsgi.application'
 
+AUTHENTICATION_BACKENDS = [
+    # Needed to login by username in Django admin, regardless of `allauth`
+    'django.contrib.auth.backends.ModelBackend',
+
+    # `allauth` specific authentication methods, such as login by e-mail
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
@@ -118,8 +140,112 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    BASE_DIR / "static"
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+SITE_ID = 1
+
+LOGIN_URL = 'accounts/login/'
+LOGIN_REDIRECT_URL = '/'
+
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_EMAIL_VERIFICATION = 'optional'
+
+ACCOUNT_FORMS = {'signup': 'sign.models.BasicSignupForm'}
+
+EMAIL_HOST = 'smtp.yandex.ru' # адрес сервера Яндекс-почты для всех один и тот же
+EMAIL_PORT = 465 # порт smtp сервера тоже одинаковый
+EMAIL_HOST_USER = 'mongushit@yandex.ru' # ваше имя пользователя, например если ваша почта user@yandex.ru, то сюда надо писать user, иными словами, это всё то что идёт до собаки
+EMAIL_HOST_PASSWORD = 'hiyvfkfejgaopolj' # пароль от почты
+EMAIL_USE_SSL = True # Яндекс использует ssl, подробнее о том, что это, почитайте на Википедии, но включать его здесь обязательно
+
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+# Provider specific settings
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        # For each OAuth based provider, either add a ``SocialApp``
+        # (``socialaccount`` app) containing the required client
+        # credentials, or list them here:
+        'APP': {
+            'client_id': '165946328896-4fois86e7qvrncg7vhekf73kucl072gj.apps.googleusercontent.com',
+            'secret': 'JaHzDshr1ef_fqZGPWoyn5Io',
+            'key': ''
+        }
+    }
+}
+
+ADMINS = [
+    ('Aidys', 'mongushit79@gmail.com'),
+    # список всех админов в формате ('имя', 'их почта')
+]
+MANAGERS = [
+    ('Айдыс', 'mongush10011979@gmail.com'),
+    # список всех менеджеров в формате ('имя', 'их почта')
+]
+SERVER_EMAIL = 'mongushit@yandex.ru' # это будет у нас вместо аргумента FROM в массовой рассылке
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': os.path.join(BASE_DIR, 'cache_files'), # Указываем, куда будем сохранять
+        # кэшируемые файлы! Не забываем создать папку cache_files внутри папки с manage.py!
+    }
+}
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'simple': {
+            'format': '[%(asctime)s] %(levelname)s %(message)s'
+        },
+
+        'for_warning': {
+            'level': 'WARNING',
+            'format': '%(pathname)s %(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+        },
+        'for_errors': {
+            'level': 'ERROR',
+            'format': '%(pathname)s %(levelname)s %(asctime)s %(message)s %(exc_info)s'
+        },
+    },
+    'filters': {
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        },
+        'mail_admins': {
+            'level': 'ERROR',
+            'class': 'django.utils.log.AdminEmailHandler'
+        }
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'propagate': True,
+        },
+        'django.request': {
+            'handlers': ['mail_admins'],
+            'level': 'ERROR',
+            'propagate': False,
+        }
+    }
+}
