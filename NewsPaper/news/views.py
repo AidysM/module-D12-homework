@@ -19,6 +19,11 @@ from .forms import PostForm
 
 logger = logging.getLogger(__name__)
 
+logger.debug("Hello! I'm debug in your app. Enjoy:)")
+logger.info("Hello! I'm info in your app. Enjoy:)")
+logger.warning("Hello! I'm warning in your app. Enjoy:)")
+logger.error("Hello! I'm error in your app. Enjoy:)")
+logger.critical("Hello! I'm critical in your app. Enjoy:)")
 
 class PostList(ListView):
     model = Post  # указываем модель, объекты которой мы будем выводить

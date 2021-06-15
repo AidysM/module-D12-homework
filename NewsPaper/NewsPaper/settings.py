@@ -210,13 +210,13 @@ LOGGING = {
             'format': '[%(asctime)s] %(levelname)s %(message)s'
         },
 
-        'for_warning': {
+        'forwarning': {
             'level': 'WARNING',
             'format': '%(pathname)s %(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
         },
         'for_errors': {
             'level': 'ERROR',
-            'format': '%(pathname)s %(levelname)s %(asctime)s %(message)s %(exc_info)s'
+            'format': '%(pathname)s %(levelname)s %(asctime)s %(module)s %(message)s %(exc_info)s'
         },
     },
     'filters': {
@@ -235,17 +235,41 @@ LOGGING = {
         'mail_admins': {
             'level': 'ERROR',
             'class': 'django.utils.log.AdminEmailHandler'
-        }
+        },
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'formatter': 'forwarning',
+            'filename': 'general.log',
+            'maxBytes': 1024,
+            'backupCount': 3
+        },
+        'errors': {
+            'level': 'ERROR',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'formatter': 'for_errors',
+            'filename': 'errors.log',
+            'maxBytes': 1024,
+            'backupCount': 3
+        },
+        'security': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'formatter': 'for_errors',
+            'filename': 'security.log',
+            'maxBytes': 1024,
+            'backupCount': 3
+        },
     },
     'loggers': {
         'django': {
-            'handlers': ['console'],
+            'handlers': ['console', 'file'],
             'propagate': True,
         },
         'django.request': {
-            'handlers': ['mail_admins'],
+            'handlers': ['mail_admins', 'errors'],
             'level': 'ERROR',
             'propagate': False,
-        }
+        },
+
     }
 }
