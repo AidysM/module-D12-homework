@@ -218,12 +218,18 @@ LOGGING = {
             'level': 'ERROR',
             'format': '%(pathname)s %(levelname)s %(asctime)s %(module)s %(message)s %(exc_info)s'
         },
+        'for_mail': {
+            'level': 'ERROR',
+            'format': '%(pathname)s %(levelname)s %(asctime)s %(module)s %(message)s'
+        },
     },
     'filters': {
         'require_debug_true': {
             '()': 'django.utils.log.RequireDebugTrue',
         },
-
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
+        },
     },
     'handlers': {
         'console': {
@@ -239,6 +245,7 @@ LOGGING = {
         'file': {
             'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
+            'filters': ['require_debug_false'],
             'formatter': 'forwarning',
             'filename': 'general.log',
             'maxBytes': 1024,
@@ -268,8 +275,30 @@ LOGGING = {
         'django.request': {
             'handlers': ['mail_admins', 'errors'],
             'level': 'ERROR',
+            'filters': ['require_debug_false'],
+            'propagate': False,
+            'formatter': 'for_mail',
+        },
+        'django.server': {
+            'handlers': ['mail_admins', 'errors'],
+            'level': 'ERROR',
+            'filters': ['require_debug_false'],
+            'propagate': False,
+            'formatter': 'for_mail',
+        },
+        'django.template': {
+            'handlers': ['errors'],
+            'level': 'ERROR',
             'propagate': False,
         },
-
-    }
+        'django.db_backends': {
+            'handlers': ['errors'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.security': {
+            'handlers': ['security'],
+            'propagate': False,
+        },
+    },
 }
